@@ -14,7 +14,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.Eco
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
@@ -68,7 +70,6 @@ fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.height(48.dp))
 
-            // ── Logo / Brand Header ──────────────────────────────────────
             Box(
                 modifier = Modifier
                     .size(88.dp)
@@ -76,16 +77,18 @@ fun LoginScreen(
                     .background(LeafGreen),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "🐸",
-                    style = MaterialTheme.typography.displayLarge
+                Icon(
+                    imageVector = Icons.Outlined.Eco,
+                    contentDescription = null,
+                    tint = EcoWhite,
+                    modifier = Modifier.size(48.dp)
                 )
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "Toad App",
+                text = "Toad",
                 style = MaterialTheme.typography.headlineLarge,
                 color = LeafGreen
             )
@@ -99,7 +102,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(36.dp))
 
-            // ── Card Container ───────────────────────────────────────────
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -113,7 +115,6 @@ fun LoginScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
 
-                    // ── Username Field ───────────────────────────────────
                     OutlinedTextField(
                         value = uiState.username,
                         onValueChange = viewModel::onUsernameChanged,
@@ -155,7 +156,6 @@ fun LoginScreen(
                         shape = RoundedCornerShape(12.dp)
                     )
 
-                    // ── Password Field ───────────────────────────────────
                     OutlinedTextField(
                         value = uiState.password,
                         onValueChange = viewModel::onPasswordChanged,
@@ -219,7 +219,6 @@ fun LoginScreen(
                         shape = RoundedCornerShape(12.dp)
                     )
 
-                    // ── API Error Banner ─────────────────────────────────
                     AnimatedVisibility(
                         visible = uiState.apiError != null,
                         enter = fadeIn() + slideInVertically(),
@@ -248,7 +247,6 @@ fun LoginScreen(
                         }
                     }
 
-                    // ── Login Button ─────────────────────────────────────
                     Button(
                         onClick = {
                             focusManager.clearFocus()
@@ -278,6 +276,32 @@ fun LoginScreen(
                                 style = MaterialTheme.typography.labelLarge
                             )
                         }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedButton(
+                        onClick = viewModel::onLoginOffline,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        enabled = !uiState.isLoading,
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = LeafGreen
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, LeafGreen.copy(alpha = 0.5f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.CloudOff,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Reportes guardados (Offline)",
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
                 }
             }

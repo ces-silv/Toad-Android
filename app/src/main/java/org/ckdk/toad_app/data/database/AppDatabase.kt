@@ -1,0 +1,40 @@
+package org.ckdk.toad_app.data.database
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import org.ckdk.toad_app.data.database.converter.Converters
+import org.ckdk.toad_app.data.database.dao.ReportDao
+import org.ckdk.toad_app.data.database.entity.ReportEntity
+
+@Database(entities = [ReportEntity::class], version = 2, exportSchema = false)
+@TypeConverters(Converters::class)
+abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun reportDao(): ReportDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        @Volatile
+        var appContext: Context? = null
+
+        fun getDatabase(context: Context): AppDatabase {
+            appContext = context.applicationContext
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "toad_app_database"
+                )
+                .fallbackToDestructiveMigration()
+                .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+}

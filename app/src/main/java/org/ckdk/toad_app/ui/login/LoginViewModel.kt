@@ -19,7 +19,8 @@ data class LoginUiState(
     val passwordError: String? = null,
     val apiError: String? = null,
     val isLoading: Boolean = false,
-    val loggedInUser: User? = null
+    val loggedInUser: User? = null,
+    val isOfflineMode: Boolean = false
 )
 
 class LoginViewModel(
@@ -71,6 +72,16 @@ class LoginViewModel(
     fun onLogout() {
         _uiState.update { LoginUiState() }
     }
+
+    fun onLoginOffline() {
+        _uiState.update {
+            it.copy(
+                isOfflineMode = true,
+                loggedInUser = null
+            )
+        }
+    }
+
     private fun validate(state: LoginUiState): Boolean {
         var valid = true
 
