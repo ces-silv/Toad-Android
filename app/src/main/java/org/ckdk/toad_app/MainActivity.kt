@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Toad_AppTheme {
-                val loginViewModel: LoginViewModel = viewModel()
+                val loginViewModel: LoginViewModel = viewModel() // if the view model exists then return it, If it doesn't then create it
                 val uiState by loginViewModel.uiState.collectAsState()
 
                 if (uiState.isOfflineMode) {
