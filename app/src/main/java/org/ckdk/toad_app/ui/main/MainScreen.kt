@@ -762,7 +762,7 @@ fun CreateReportScreenContent(
                     ) {
                         Icon(Icons.Outlined.Map, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Buscar en Mapa")
+                        Text("Buscar Mapa")
                     }
                 }
             }

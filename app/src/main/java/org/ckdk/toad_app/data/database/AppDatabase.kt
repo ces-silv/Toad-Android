@@ -17,7 +17,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         @Volatile
-        private var INSTANCE: AppDatabase? = null
+        private var DB_INSTANCE: AppDatabase? = null
 
         @Volatile
         var appContext: Context? = null
@@ -26,7 +26,7 @@ abstract class AppDatabase : RoomDatabase() {
             appContext = context.applicationContext
             // If instance already exists then return it
             // if not we use synchronized to make sure that only one thread at a time can create a database
-            return INSTANCE ?: synchronized(this) {
+            return DB_INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
@@ -34,7 +34,7 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                 .fallbackToDestructiveMigration()
                 .build()
-                INSTANCE = instance
+                DB_INSTANCE = instance
                 instance
             }
         }
