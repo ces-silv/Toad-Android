@@ -8,17 +8,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.Style
 
 private const val OSM_STYLE_JSON = """{
   "version": 8,
@@ -53,32 +51,26 @@ fun MapSelectionDialog(
     onConfirm: (Double, Double) -> Unit
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
 
     // Fallback default coordinates if none provided
-    val defaultLat = if (initialLatitude != 0.0) initialLatitude else 12.1364
-    val defaultLng = if (initialLongitude != 0.0) initialLongitude else -86.2514
+    val defaultLat = if (initialLatitude != 0.0) initialLatitude else 12.10864
+    val defaultLng = if (initialLongitude != 0.0) initialLongitude else -86.25952
+    
 
     var selectedLatLng by remember { mutableStateOf(LatLng(defaultLat, defaultLng)) }
 
-    val mapView = remember { MapView(context) }
-
-    // Synchronize Android MapView with Compose lifecycle
-    DisposableEffect(lifecycleOwner, mapView) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_CREATE -> mapView.onCreate(Bundle())
-                Lifecycle.Event.ON_START -> mapView.onStart()
-                Lifecycle.Event.ON_RESUME -> mapView.onResume()
-                Lifecycle.Event.ON_PAUSE -> mapView.onPause()
-                Lifecycle.Event.ON_STOP -> mapView.onStop()
-                Lifecycle.Event.ON_DESTROY -> mapView.onDestroy()
-                else -> {}
-            }
+    val mapView = remember {
+        MapView(context).apply {
+            onCreate(Bundle())
+            onStart()
+            onResume()
         }
-        lifecycleOwner.lifecycle.addObserver(observer)
+    }
+
+    DisposableEffect(Unit) {
         onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
+            mapView.onPause()
+            mapView.onStop()
             mapView.onDestroy()
         }
     }
@@ -121,30 +113,26 @@ fun MapSelectionDialog(
                         .fillMaxWidth()
                 ) {
                     AndroidView(
-                        factory = { mapView },
                         modifier = Modifier.fillMaxSize(),
-                        update = { view ->
-                            view.getMapAsync { map ->
-                                map.setStyle(OSM_STYLE_JSON) { style ->
-                                    val currentPos = LatLng(selectedLatLng.latitude, selectedLatLng.longitude)
-                                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, 14.0))
+                        factory = {
+                            mapView.apply {
+                                getMapAsync { map ->
+                                    map.setStyle(Style.Builder().fromJson(OSM_STYLE_JSON)) {
+                                        val pos = LatLng(defaultLat, defaultLng)
+                                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(pos, 14.0))
 
-                                    // Add marker
-                                    var currentMarker = map.addMarker(
-                                        MarkerOptions()
-                                            .position(currentPos)
-                                            .title("Ubicación del Reporte")
-                                    )
-
-                                    map.addOnMapClickListener { latLng ->
-                                        map.clear()
-                                        currentMarker = map.addMarker(
-                                            MarkerOptions()
-                                                .position(latLng)
-                                                .title("Nueva ubicación")
+                                        map.addMarker(
+                                            MarkerOptions().position(pos).title("Ubicación del Reporte")
                                         )
-                                        selectedLatLng = latLng
-                                        true
+
+                                        map.addOnMapClickListener { latLng ->
+                                            map.clear()
+                                            map.addMarker(
+                                                MarkerOptions().position(latLng).title("Nueva ubicación")
+                                            )
+                                            selectedLatLng = latLng
+                                            true
+                                        }
                                     }
                                 }
                             }
